@@ -13,7 +13,7 @@ import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } 
 import { AlertSummaryView } from '../../../common/components/event_details/alert_summary_view';
 import { HIGHLIGHTED_FIELDS_TITLE } from './translations';
 import { useRightPanelContext } from '../context';
-import { RightPanelKey, RightPanelTableTabPath } from '..';
+import { RightPanelKey, RightPanelTableTab } from '..';
 
 /**
  * Component that displays the highlighted fields in the right panel under the Investigation section.
@@ -28,7 +28,7 @@ export const HighlightedFields: FC = () => {
   const goToTableTab = useCallback(() => {
     openRightPanel({
       id: RightPanelKey,
-      path: RightPanelTableTabPath,
+      path: { tab: RightPanelTableTab },
       params: {
         id: eventId,
         indexName,
