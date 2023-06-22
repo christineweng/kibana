@@ -116,7 +116,7 @@ export const StyledMapContainer = styled.div<{ backgroundColor: string }>`
  * The Panel, styled for use in `ResolverMap`.
  */
 export const StyledPanel = styled(EuiPanel)`
-  position: absolute;
+  /* position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
@@ -124,7 +124,7 @@ export const StyledPanel = styled(EuiPanel)`
   width: 25em;
   max-width: 50%;
   border-radius: 0;
-  border-top: none;
+  border-top: none; */
 `;
 
 /**

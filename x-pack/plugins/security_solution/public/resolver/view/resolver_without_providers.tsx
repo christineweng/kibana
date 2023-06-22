@@ -9,7 +9,8 @@
 
 import React, { useContext, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import styled from 'styled-components';
+import { EuiLoadingSpinner, EuiResizableContainer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useResolverQueryParamCleaner } from './use_resolver_query_params_cleaner';
 import * as selectors from '../store/selectors';
@@ -29,6 +30,19 @@ import { useSyncSelectedNode } from './use_sync_selected_node';
 import { ResolverNoProcessEvents } from './resolver_no_process_events';
 import { useAutotuneTimerange } from './use_autotune_timerange';
 import type { State } from '../../common/store/types';
+
+export const StyledEuiResizableContainer = styled(EuiResizableContainer)`
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  overflow: auto;
+  /* width: 25em;*/
+  /* max-width: 50%; */
+  border-radius: 0;
+  border-top: none;
+`;
+
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
  */
@@ -166,7 +180,24 @@ export const ResolverWithoutProviders = React.memo(
                 );
               })}
             </GraphContainer>
-            <PanelRouter id={resolverComponentInstanceID} />
+            {/* <PanelRouter id={resolverComponentInstanceID} /> */}
+            <StyledEuiResizableContainer direction={'horizontal'}>
+              {(EuiResizablePanel, EuiResizableButton) => (
+                <>
+                  <EuiResizablePanel
+                    mode={['collapsible', { position: 'top' }]}
+                    initialSize={25}
+                    minSize="20%"
+                  >
+                    <PanelRouter id={resolverComponentInstanceID} />
+                  </EuiResizablePanel>
+                  <EuiResizableButton />
+                  <EuiResizablePanel mode="main" initialSize={75}>
+                    <div />
+                  </EuiResizablePanel>
+                </>
+              )}
+            </StyledEuiResizableContainer>
           </>
         ) : (
           <ResolverNoProcessEvents />
