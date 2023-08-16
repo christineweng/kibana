@@ -107,6 +107,7 @@ export function useAlertPrevalenceFromProcessTree({
     documentId,
     indices: alertAndOriginalIndices,
   });
+  const enabled = schema !== null && id !== null;
   const query = useQuery<ProcessTreeAlertPrevalenceResponse>(
     ['getAlertPrevalenceFromProcessTree', id],
     () => {
@@ -121,9 +122,9 @@ export function useAlertPrevalenceFromProcessTree({
         }),
       });
     },
-    { enabled: schema !== null && id !== null }
+    { enabled }
   );
-  if (query.isLoading || loading) {
+  if ((enabled && query.isLoading) || loading) {
     return {
       loading: true,
       error: false,

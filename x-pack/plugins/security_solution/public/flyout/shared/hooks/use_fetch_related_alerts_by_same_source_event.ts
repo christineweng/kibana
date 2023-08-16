@@ -47,18 +47,13 @@ export const useFetchRelatedAlertsBySameSourceEvent = ({
   dataFormattedForFieldBrowser,
   scopeId,
 }: UseFetchRelatedAlertsBySameSourceEventParams): UseFetchRelatedAlertsBySameSourceEventResult => {
-  const { field, values } = useMemo(
-    () =>
-      find(
-        { category: 'kibana', field: 'kibana.alert.original_event.id' },
-        dataFormattedForFieldBrowser
-      ) || { field: '', values: [] },
-    [dataFormattedForFieldBrowser]
+  const originalEventId = find(
+    { category: 'kibana', field: 'kibana.alert.original_event.id' },
+    dataFormattedForFieldBrowser
   );
-
   const { loading, error, count, alertIds } = useAlertPrevalence({
-    field,
-    value: values,
+    field: 'kibana.alert.original_event.id',
+    value: originalEventId?.values,
     isActiveTimelines: isActiveTimeline(scopeId),
     signalIndexName: null,
     includeAlertIds: true,

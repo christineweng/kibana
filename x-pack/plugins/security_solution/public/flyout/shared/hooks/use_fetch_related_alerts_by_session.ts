@@ -51,10 +51,9 @@ export const useFetchRelatedAlertsBySession = ({
     { category: 'process', field: 'process.entry_leader.entity_id' },
     dataFormattedForFieldBrowser
   );
-  const { field, values } = processSessionField || { field: '', values: [] };
   const { loading, error, count, alertIds } = useAlertPrevalence({
-    field,
-    value: values,
+    field: 'process.entry_leader.entity_id',
+    value: processSessionField?.values,
     isActiveTimelines: isActiveTimeline(scopeId),
     signalIndexName: null,
     includeAlertIds: true,
