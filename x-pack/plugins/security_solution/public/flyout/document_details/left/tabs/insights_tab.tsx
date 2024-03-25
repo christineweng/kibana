@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
+import { EuiButtonGroup, EuiSpacer, EuiButton } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,6 +30,13 @@ import { PREVALENCE_TAB_ID, PrevalenceDetails } from '../components/prevalence_d
 import { CORRELATIONS_TAB_ID, CorrelationsDetails } from '../components/correlations_details';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
+import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import {
+  DocumentDetailsPreviewPanelKey,
+  AlertReasonPreviewPanel,
+  type PreviewPanelProps,
+  RulePreviewPanel,
+} from '../../preview';
 
 const insightsButtons: EuiButtonGroupOptionProps[] = [
   {
@@ -79,11 +86,15 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
  */
 export const InsightsTab: React.FC = memo(() => {
   const { telemetry } = useKibana().services;
-  const { eventId, indexName, scopeId, getFieldsData } = useLeftPanelContext();
+  const { eventId, indexName, scopeId, getFieldsData, dataFormattedForFieldBrowser } =
+    useLeftPanelContext();
   const isEventKindSignal = getField(getFieldsData('event.kind')) === EventKind.signal;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const panels = useExpandableFlyoutState();
   const activeInsightsId = panels.left?.path?.subTab ?? ENTITIES_TAB_ID;
+
+  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const { openPreviewPanel } = useExpandableFlyoutApi();
 
   // insight tabs based on whether document is alert or non-alert
   // alert: entities, threat intelligence, prevalence, correlations
@@ -121,6 +132,50 @@ export const InsightsTab: React.FC = memo(() => {
     [eventId, indexName, scopeId, openLeftPanel, telemetry]
   );
 
+  const onClick1 = useCallback(() => {
+    const PreviewPanelRulePreview: PreviewPanelProps['path'] = { tab: RulePreviewPanel };
+    openPreviewPanel({
+      id: DocumentDetailsPreviewPanelKey,
+      path: PreviewPanelRulePreview,
+      params: {
+        id: eventId,
+        indexName,
+        scopeId,
+        banner: {
+          title: i18n.translate(
+            'xpack.securitySolution.flyout.right.about.description.rulePreviewTitle',
+            { defaultMessage: 'Preview rule details' }
+          ),
+          backgroundColor: 'warning',
+          textColor: 'warning',
+        },
+        ruleId,
+      },
+    });
+  }, [eventId, ruleId, indexName, scopeId, openPreviewPanel]);
+
+  const onClick2 = useCallback(() => {
+    openPreviewPanel({
+      id: DocumentDetailsPreviewPanelKey,
+      path: { tab: AlertReasonPreviewPanel },
+      params: {
+        id: eventId,
+        indexName,
+        scopeId,
+        banner: {
+          title: i18n.translate(
+            'xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle',
+            {
+              defaultMessage: 'Preview alert reason',
+            }
+          ),
+          backgroundColor: 'warning',
+          textColor: 'warning',
+        },
+      },
+    });
+  }, [eventId, indexName, scopeId, openPreviewPanel]);
+
   return (
     <>
       <EuiButtonGroup
@@ -138,6 +193,8 @@ export const InsightsTab: React.FC = memo(() => {
         style={!isEventKindSignal ? { maxWidth: 300 } : undefined}
       />
       <EuiSpacer size="m" />
+      <EuiButton onClick={onClick1}>{'1'}</EuiButton>
+      <EuiButton onClick={onClick2}>{'2'}</EuiButton>
       {activeInsightsId === ENTITIES_TAB_ID && <EntitiesDetails />}
       {activeInsightsId === THREAT_INTELLIGENCE_TAB_ID && <ThreatIntelligenceDetails />}
       {activeInsightsId === PREVALENCE_TAB_ID && <PrevalenceDetails />}
