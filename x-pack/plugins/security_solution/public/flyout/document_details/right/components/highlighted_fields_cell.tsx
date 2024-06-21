@@ -31,8 +31,16 @@ import {
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
 import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../../common/endpoint/service/response_actions/constants';
+import { HostPreviewPanelKey } from '../../../entity_details/host_preview';
+import { HOST_PREVIEW_BANNER } from './host_entity_overview';
+import { UserPreviewPanelKey } from '../../../entity_details/user_preview';
+import { USER_PREVIEW_BANNER } from './user_entity_overview';
 
 interface LinkFieldCellProps {
+  /**
+   * Highlighted field's field name
+   */
+  field: string;
   /**
    * Highlighted field's value to display as a EuiLink to open the expandable left panel
    * (used for host name and username fields)
@@ -43,9 +51,10 @@ interface LinkFieldCellProps {
 /**
  * // Currently we can use the same component for both host name and username
  */
-const LinkFieldCell: VFC<LinkFieldCellProps> = ({ value }) => {
+const LinkFieldCell: VFC<LinkFieldCellProps> = ({ field, value }) => {
   const { scopeId, eventId, indexName } = useDocumentDetailsContext();
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
+  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
 
   const goToInsightsEntities = useCallback(() => {
     openLeftPanel({
@@ -59,8 +68,40 @@ const LinkFieldCell: VFC<LinkFieldCellProps> = ({ value }) => {
     });
   }, [eventId, indexName, openLeftPanel, scopeId]);
 
+  const openHostPreview = useCallback(() => {
+    openPreviewPanel({
+      id: HostPreviewPanelKey,
+      params: {
+        hostName: value,
+        scopeId,
+        banner: HOST_PREVIEW_BANNER,
+      },
+    });
+  }, [openPreviewPanel, value, scopeId]);
+
+  const openUserPreview = useCallback(() => {
+    openPreviewPanel({
+      id: UserPreviewPanelKey,
+      params: {
+        userName: value,
+        scopeId,
+        banner: USER_PREVIEW_BANNER,
+      },
+    });
+  }, [openPreviewPanel, value, scopeId]);
+
+  const onClick = useMemo(() => {
+    if (isPreviewEnabled && field === HOST_NAME_FIELD_NAME) {
+      return openHostPreview;
+    }
+    if (isPreviewEnabled && field === USER_NAME_FIELD_NAME) {
+      return openUserPreview;
+    }
+    return goToInsightsEntities;
+  }, [isPreviewEnabled, field, openHostPreview, openUserPreview, goToInsightsEntities]);
+
   return (
-    <EuiLink onClick={goToInsightsEntities} data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}>
+    <EuiLink onClick={onClick} data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}>
       {value}
     </EuiLink>
   );
@@ -144,7 +185,7 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
               data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
             >
               {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
-                <LinkFieldCell value={value} />
+                <LinkFieldCell field={field} value={value} />
               ) : field === AGENT_STATUS_FIELD_NAME ? (
                 <FieldsAgentStatus value={value} agentType={agentType} />
               ) : (
