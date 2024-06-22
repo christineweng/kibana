@@ -36,8 +36,7 @@ export const RULE_OVERVIEW_BANNER = {
  */
 export const AlertDescription: FC = () => {
   const { telemetry } = useKibana().services;
-  const { dataFormattedForFieldBrowser, scopeId, eventId, indexName, isPreview } =
-    useDocumentDetailsContext();
+  const { dataFormattedForFieldBrowser, scopeId, isPreview } = useDocumentDetailsContext();
   const { isAlert, ruleDescription, ruleName, ruleId } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
@@ -46,9 +45,6 @@ export const AlertDescription: FC = () => {
     openPreviewPanel({
       id: DocumentDetailsRuleOverviewPanelKey,
       params: {
-        id: eventId,
-        indexName,
-        scopeId,
         banner: RULE_OVERVIEW_BANNER,
         ruleId,
       },
@@ -57,7 +53,7 @@ export const AlertDescription: FC = () => {
       location: scopeId,
       panel: 'preview',
     });
-  }, [eventId, openPreviewPanel, indexName, scopeId, ruleId, telemetry]);
+  }, [openPreviewPanel, scopeId, ruleId, telemetry]);
 
   const viewRule = useMemo(
     () => (

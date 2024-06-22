@@ -7,10 +7,17 @@
 
 import type { ReactElement, ReactNode } from 'react';
 import React, { type FC, useMemo, useCallback } from 'react';
-import { type Criteria, EuiBasicTable, formatDate } from '@elastic/eui';
+import {
+  type Criteria,
+  type EuiBasicTableColumn,
+  EuiBasicTable,
+  formatDate,
+  EuiLink,
+} from '@elastic/eui';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
 import { isRight } from 'fp-ts/lib/Either';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -22,11 +29,15 @@ import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { InvestigateInTimelineButton } from '../../../../common/components/event_details/table/investigate_in_timeline_button';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import { getDataProvider } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
+import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
+import { ALERT_PREVIEW_BANNER } from '../../preview';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const dataProviderLimit = 5;
 
-export const columns = [
+export const getCorrelationsColumns = (
+  openDetailsPreview: (id: string, indexName: string) => void
+): Array<EuiBasicTableColumn<Record<string, unknown>>> => [
   {
     field: '@timestamp',
     name: (
@@ -47,19 +58,25 @@ export const columns = [
     },
   },
   {
-    field: ALERT_RULE_NAME,
     name: (
       <FormattedMessage
         id="xpack.securitySolution.flyout.left.insights.correlations.ruleColumnLabel"
-        defaultMessage="Rule"
+        defaultMessage="Alert"
       />
     ),
     truncateText: true,
-    render: (value: string) => (
-      <CellTooltipWrapper tooltip={value}>
-        <span>{value}</span>
-      </CellTooltipWrapper>
-    ),
+    render: (data: Record<string, unknown>) => {
+      const ruleName = data[ALERT_RULE_NAME] as string;
+      return (
+        <CellTooltipWrapper tooltip={ruleName}>
+          <span>
+            <EuiLink onClick={() => openDetailsPreview(data.id as string, data.index as string)}>
+              {ruleName}
+            </EuiLink>
+          </span>
+        </CellTooltipWrapper>
+      );
+    },
   },
   {
     field: ALERT_REASON,
@@ -149,6 +166,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     sorting,
     error,
   } = usePaginatedAlerts(alertIds || []);
+  const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const onTableChange = useCallback(
     ({ page, sort }: Criteria<Record<string, unknown>>) => {
@@ -166,13 +184,19 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
 
   const mappedData = useMemo(() => {
     return data
-      .map((hit) => hit.fields)
-      .map((fields = {}) =>
-        Object.keys(fields).reduce((result, fieldName) => {
-          result[fieldName] = fields?.[fieldName]?.[0] || fields?.[fieldName];
+      .map((hit) => {
+        return { fields: hit.fields ?? {}, id: hit._id, index: hit._index };
+      })
+      .map((dataWithMeta) => {
+        const res = Object.keys(dataWithMeta.fields).reduce((result, fieldName) => {
+          result[fieldName] =
+            dataWithMeta.fields?.[fieldName]?.[0] || dataWithMeta.fields?.[fieldName];
           return result;
-        }, {} as Record<string, unknown>)
-      );
+        }, {} as Record<string, unknown>);
+        res.id = dataWithMeta.id;
+        res.index = dataWithMeta.index;
+        return res;
+      });
   }, [data]);
 
   const shouldUseFilters = Boolean(
@@ -186,6 +210,21 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     () => (shouldUseFilters ? getFilters(alertIds) : null),
     [alertIds, shouldUseFilters]
   );
+
+  const openDetailsPreview = useCallback(
+    (id: string, indexName: string) =>
+      openPreviewPanel({
+        id: DocumentDetailsPreviewPanelKey,
+        params: {
+          id,
+          indexName,
+          scopeId,
+          banner: ALERT_PREVIEW_BANNER,
+        },
+      }),
+    [openPreviewPanel, scopeId]
+  );
+  const columns = getCorrelationsColumns(openDetailsPreview);
 
   return (
     <ExpandablePanel
