@@ -49,14 +49,14 @@ export const UrlSynchronizer = () => {
       dispatch(
         urlChangedAction({
           ...currentValue,
-          preview: currentValue?.preview?.[0],
+          preview: currentValue?.preview?.at(-1),
           id: urlKey,
         })
       );
     }
 
     const subscription = urlStorage.change$<FlyoutState>(urlKey).subscribe((value) => {
-      dispatch(urlChangedAction({ ...value, preview: value?.preview?.[0], id: urlKey }));
+      dispatch(urlChangedAction({ ...value, preview: value?.preview?.at(-1), id: urlKey }));
     });
 
     return () => subscription.unsubscribe();

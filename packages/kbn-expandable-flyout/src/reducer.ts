@@ -89,7 +89,8 @@ export const reducer = createReducer(initialState, (builder) => {
       state.byId[id].preview?.pop();
     }
 
-    state.needsSync = true;
+    // if state is stored in url, click go back in preview should utilize browser history
+    state.needsSync = false;
   });
 
   builder.addCase(closePanelsAction, (state, { payload: { id } }) => {
