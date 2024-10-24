@@ -79,8 +79,8 @@ export const AnalyzerPreviewContainer: React.FC = () => {
         ),
         iconType: visualizationInFlyoutEnabled ? 'arrowStart' : 'timeline',
         ...(isEnabled &&
-          !isPreview &&
-          !isPreviewMode && {
+          !isPreview && {
+            // !isPreviewMode && {
             link: {
               callback: visualizationInFlyoutEnabled ? navigateToAnalyzer : goToAnalyzerTab,
               tooltip: visualizationInFlyoutEnabled ? (

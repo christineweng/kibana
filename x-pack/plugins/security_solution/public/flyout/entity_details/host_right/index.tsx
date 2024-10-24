@@ -66,7 +66,7 @@ export const HostPanel = ({
   isPreviewMode,
 }: HostPanelProps) => {
   const { telemetry } = useKibana().services;
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
   const hostNameFilterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
@@ -166,6 +166,36 @@ export const HostPanel = ({
     [isRiskScoreExist, openTabPanel]
   );
 
+  // const openHostFlyout = useCallback(() => {
+  //   openFlyout({
+  //     right: {
+  //       id: HostPanelKey,
+  //       title: hostName,
+  //       params: {
+  //         hostName,
+  //         scopeId,
+  //       },
+  //     },
+  //     left: {
+  //       id: HostDetailsPanelKey,
+  //       params: {
+  //         name: hostName,
+  //         scopeId,
+  //         isRiskScoreExist,
+  //         hasMisconfigurationFindings,
+  //         hasVulnerabilitiesFindings,
+  //       },
+  //     },
+  //   });
+  // }, [
+  //   hostName,
+  //   scopeId,
+  //   isRiskScoreExist,
+  //   hasMisconfigurationFindings,
+  //   hasVulnerabilitiesFindings,
+  //   openFlyout,
+  // ]);
+
   const observedHost = useObservedHost(hostName, scopeId);
 
   if (observedHost.isLoading) {
@@ -206,7 +236,8 @@ export const HostPanel = ({
               contextID={contextID}
               scopeId={scopeId}
               isDraggable={!!isDraggable}
-              openDetailsPanel={!isPreviewMode ? openTabPanel : undefined}
+              openDetailsPanel={openTabPanel}
+              // openDetailsPanel={!isPreviewMode ? openTabPanel : openHostFlyout}
               recalculatingScore={recalculatingScore}
               onAssetCriticalityChange={calculateEntityRiskScore}
               isPreviewMode={isPreviewMode}

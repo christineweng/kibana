@@ -15,6 +15,7 @@ import {
   useEuiTheme,
   useEuiFontSize,
   EuiSkeletonText,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
@@ -59,6 +60,7 @@ import {
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
 import { PreviewLink } from '../../../shared/components/preview_link';
+import { UserPanelKey } from '../../../entity_details/user_right';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 
@@ -84,7 +86,7 @@ export const USER_PREVIEW_BANNER = {
  */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
   const { eventId, indexName, scopeId } = useDocumentDetailsContext();
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { openFlyout, openLeftPanel } = useExpandableFlyoutApi();
 
   const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
@@ -99,6 +101,20 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
       },
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
+
+  const goToUserFlyout = useCallback(() => {
+    openFlyout({
+      right: {
+        id: UserPanelKey,
+        title: userName,
+        params: {
+          userName,
+          scopeId,
+        },
+      },
+    });
+  }, [userName, openFlyout, scopeId]);
+
   const { from, to } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
 
@@ -238,6 +254,9 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
                 {userName}
               </EuiLink>
             )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon iconType={'expand'} onClick={goToUserFlyout} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

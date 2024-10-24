@@ -15,6 +15,7 @@ import {
   useEuiTheme,
   useEuiFontSize,
   EuiSkeletonText,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
@@ -60,6 +61,7 @@ import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
 import { PreviewLink } from '../../../shared/components/preview_link';
+import { HostPanelKey } from '../../../entity_details/host_right';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
 import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
@@ -86,7 +88,7 @@ export const HOST_PREVIEW_BANNER = {
  */
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
   const { eventId, indexName, scopeId } = useDocumentDetailsContext();
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { openFlyout, openLeftPanel } = useExpandableFlyoutApi();
   const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const goToEntitiesTab = useCallback(() => {
@@ -100,6 +102,20 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
       },
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
+
+  const goToHostFlyout = useCallback(() => {
+    openFlyout({
+      right: {
+        id: HostPanelKey,
+        title: hostName,
+        params: {
+          hostName,
+          scopeId,
+        },
+      },
+    });
+  }, [hostName, openFlyout, scopeId]);
+
   const { from, to } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
 
@@ -240,6 +256,9 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
                 {hostName}
               </EuiLink>
             )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon iconType={'expand'} onClick={goToHostFlyout} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

@@ -15,7 +15,8 @@ import { useDocumentDetailsContext } from '../shared/context';
 import type { DocumentDetailsProps } from '../shared/types';
 import { PanelHeader } from '../right/header';
 import { PanelContent } from '../right/content';
-import { PreviewPanelFooter } from './footer';
+// import { PreviewPanelFooter } from './footer';
+import { PanelFooter } from '../right/footer';
 import type { RightPanelTabType } from '../right/tabs';
 import { ALERT_PREVIEW_BANNER } from './constants';
 
@@ -24,7 +25,7 @@ import { ALERT_PREVIEW_BANNER } from './constants';
  */
 export const PreviewPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId, getFieldsData, dataAsNestedObject } =
+  const { eventId, indexName, scopeId, getFieldsData, dataAsNestedObject, isPreview } =
     useDocumentDetailsContext();
   const flyoutIsExpandable = useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject });
 
@@ -55,7 +56,8 @@ export const PreviewPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) =
         style={{ marginTop: '-15px' }}
       />
       <PanelContent tabs={tabsDisplayed} selectedTabId={selectedTabId} />
-      <PreviewPanelFooter />
+      {/* <PreviewPanelFooter /> */}
+      <PanelFooter isPreview={isPreview} />
     </>
   );
 });

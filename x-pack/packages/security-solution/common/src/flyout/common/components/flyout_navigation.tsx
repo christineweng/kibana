@@ -15,9 +15,14 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
+import {
+  useExpandableFlyoutApi,
+  useExpandableFlyoutState,
+  useExpandableFlyoutHistory,
+} from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FlyoutHistory } from './flyout_history';
 import {
   HEADER_ACTIONS_TEST_ID,
   COLLAPSE_DETAILS_BUTTON_TEST_ID,
@@ -49,6 +54,9 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
     const { euiTheme } = useEuiTheme();
 
     const panels = useExpandableFlyoutState();
+
+    const history = useExpandableFlyoutHistory();
+    const hasHistory = history.length > 1;
     const isExpanded: boolean = !!panels.left;
 
     const { closeLeftPanel } = useExpandableFlyoutApi();
@@ -69,13 +77,15 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
             }
           )}
         >
-          <FormattedMessage
-            id="securitySolutionPackages.flyout.right.header.collapseDetailButtonLabel"
-            defaultMessage="Collapse details"
-          />
+          {!hasHistory && (
+            <FormattedMessage
+              id="securitySolutionPackages.flyout.right.header.collapseDetailButtonLabel"
+              defaultMessage="Collapse details"
+            />
+          )}
         </EuiButtonEmpty>
       ),
-      [collapseDetails]
+      [collapseDetails, hasHistory]
     );
 
     const expandButton = useMemo(
@@ -93,16 +103,18 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
             }
           )}
         >
-          <FormattedMessage
-            id="securitySolutionPackages.flyout.right.header.expandDetailButtonLabel"
-            defaultMessage="Expand details"
-          />
+          {!hasHistory && (
+            <FormattedMessage
+              id="securitySolutionPackages.flyout.right.header.expandDetailButtonLabel"
+              defaultMessage="Expand details"
+            />
+          )}
         </EuiButtonEmpty>
       ),
-      [expandDetails]
+      [expandDetails, hasHistory]
     );
 
-    return flyoutIsExpandable || actions ? (
+    return flyoutIsExpandable || hasHistory || actions ? (
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup
           direction="row"
@@ -116,8 +128,28 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
             height: ${euiTheme.size.xxl};
           `}
         >
-          <EuiFlexItem grow={false} data-test-subj={HEADER_NAVIGATION_BUTTON_TEST_ID}>
-            {flyoutIsExpandable && expandDetails && (isExpanded ? collapseButton : expandButton)}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              direction="row"
+              gutterSize="none"
+              justifyContent="flexStart"
+              alignItems="center"
+              responsive={false}
+            >
+              {flyoutIsExpandable && expandDetails && (
+                <EuiFlexItem
+                  grow={false}
+                  data-test-subj={HEADER_NAVIGATION_BUTTON_TEST_ID}
+                  css={css`
+                    border-right: 1px ${euiTheme.colors.lightShade} solid;
+                    padding-right: -${euiTheme.size.m};
+                  `}
+                >
+                  {isExpanded ? collapseButton : expandButton}
+                </EuiFlexItem>
+              )}
+              {hasHistory && <FlyoutHistory history={history} />}
+            </EuiFlexGroup>
           </EuiFlexItem>
           {actions && (
             <EuiFlexItem grow={false} data-test-subj={HEADER_ACTIONS_TEST_ID}>

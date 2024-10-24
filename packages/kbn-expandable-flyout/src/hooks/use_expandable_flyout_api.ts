@@ -21,6 +21,7 @@ import {
   openPreviewPanelAction,
   openRightPanelAction,
   previousPreviewPanelAction,
+  goBackAction,
 } from '../store/actions';
 import { useDispatch } from '../store/redux';
 import { FlyoutPanelProps, type ExpandableFlyoutApi } from '../types';
@@ -87,6 +88,13 @@ export const useExpandableFlyoutApi = () => {
   }, [dispatch, id, history]);
 
   const closePanels = useCallback(() => dispatch(closePanelsAction({ id })), [dispatch, id]);
+  const goBack = useCallback(() => {
+    if (id === REDUX_ID_FOR_MEMORY_STORAGE) {
+      dispatch(goBackAction({ id }));
+    } else {
+      history.goBack();
+    }
+  }, [dispatch, id, history]);
 
   const api: ExpandableFlyoutApi = useMemo(
     () => ({
@@ -99,6 +107,7 @@ export const useExpandableFlyoutApi = () => {
       closePreviewPanel,
       closeFlyout: closePanels,
       previousPreviewPanel,
+      goBack,
     }),
     [
       openPanels,
@@ -110,6 +119,7 @@ export const useExpandableFlyoutApi = () => {
       closePreviewPanel,
       closePanels,
       previousPreviewPanel,
+      goBack,
     ]
   );
 

@@ -26,20 +26,24 @@ import {
   changeUserExpandedWidthAction,
   changeUserSectionWidthsAction,
   resetAllUserChangedWidthsAction,
+  goBackAction,
 } from './actions';
 import { initialPanelsState, initialUiState } from './state';
 
 export const panelsReducer = createReducer(initialPanelsState, (builder) => {
   builder.addCase(openPanelsAction, (state, { payload: { preview, left, right, id } }) => {
+    const flyouState = { right, left, preview };
     if (id in state.byId) {
       state.byId[id].right = right;
       state.byId[id].left = left;
       state.byId[id].preview = preview ? [preview] : undefined;
+      state.byId[id].history = [...state.byId[id].history, flyouState];
     } else {
       state.byId[id] = {
         left,
         right,
         preview: preview ? [preview] : undefined,
+        history: [flyouState],
       };
     }
 
@@ -49,11 +53,25 @@ export const panelsReducer = createReducer(initialPanelsState, (builder) => {
   builder.addCase(openLeftPanelAction, (state, { payload: { left, id } }) => {
     if (id in state.byId) {
       state.byId[id].left = left;
+
+      const len = state.byId[id].history.length;
+      if (len > 0) {
+        const lastFlyout = state.byId[id].history[len - 1];
+        state.byId[id].history = [
+          ...state.byId[id].history.slice(0, len - 1),
+          {
+            right: lastFlyout.right,
+            left,
+            preview: lastFlyout.preview,
+          },
+        ];
+      }
     } else {
       state.byId[id] = {
         left,
         right: undefined,
         preview: undefined,
+        history: [],
       };
     }
 
@@ -63,11 +81,25 @@ export const panelsReducer = createReducer(initialPanelsState, (builder) => {
   builder.addCase(openRightPanelAction, (state, { payload: { right, id } }) => {
     if (id in state.byId) {
       state.byId[id].right = right;
+
+      const len = state.byId[id].history.length;
+      if (len > 0) {
+        const lastFlyout = state.byId[id].history[len - 1];
+        state.byId[id].history = [
+          ...state.byId[id].history.slice(0, len - 1),
+          {
+            right,
+            left: lastFlyout.left,
+            preview: lastFlyout.preview,
+          },
+        ];
+      }
     } else {
       state.byId[id] = {
         right,
         left: undefined,
         preview: undefined,
+        history: [],
       };
     }
 
@@ -85,11 +117,25 @@ export const panelsReducer = createReducer(initialPanelsState, (builder) => {
       } else {
         state.byId[id].preview = preview ? [preview] : undefined;
       }
+
+      const len = state.byId[id].history.length;
+      if (len > 0) {
+        const lastFlyout = state.byId[id].history[len - 1];
+        state.byId[id].history = [
+          ...state.byId[id].history.slice(0, len - 1),
+          {
+            right: lastFlyout.right,
+            left: lastFlyout.left,
+            preview,
+          },
+        ];
+      }
     } else {
       state.byId[id] = {
         right: undefined,
         left: undefined,
         preview: preview ? [preview] : undefined,
+        history: [],
       };
     }
 
@@ -99,6 +145,11 @@ export const panelsReducer = createReducer(initialPanelsState, (builder) => {
   builder.addCase(previousPreviewPanelAction, (state, { payload: { id } }) => {
     if (id in state.byId) {
       state.byId[id].preview?.pop();
+
+      // const currentPreview = state.byId[id].preview?.[-1];
+      // if (state.byId[id].history.length > 0 && currentPreview) {
+      //   state.byId[id].history[-1].preview = currentPreview;
+      // }
     }
 
     // if state is stored in url, click go back in preview should utilize browser history
@@ -110,6 +161,7 @@ export const panelsReducer = createReducer(initialPanelsState, (builder) => {
       state.byId[id].right = undefined;
       state.byId[id].left = undefined;
       state.byId[id].preview = undefined;
+      state.byId[id].history = [];
     }
 
     state.needsSync = true;
@@ -118,6 +170,19 @@ export const panelsReducer = createReducer(initialPanelsState, (builder) => {
   builder.addCase(closeLeftPanelAction, (state, { payload: { id } }) => {
     if (id in state.byId) {
       state.byId[id].left = undefined;
+
+      const len = state.byId[id].history.length;
+      if (len > 0) {
+        const lastFlyout = state.byId[id].history[len - 1];
+        state.byId[id].history = [
+          ...state.byId[id].history.slice(0, len - 1),
+          {
+            right: lastFlyout.right,
+            left: undefined,
+            preview: lastFlyout.preview,
+          },
+        ];
+      }
     }
 
     state.needsSync = true;
@@ -126,6 +191,19 @@ export const panelsReducer = createReducer(initialPanelsState, (builder) => {
   builder.addCase(closeRightPanelAction, (state, { payload: { id } }) => {
     if (id in state.byId) {
       state.byId[id].right = undefined;
+
+      const len = state.byId[id].history.length;
+      if (len > 0) {
+        const lastFlyout = state.byId[id].history[len - 1];
+        state.byId[id].history = [
+          ...state.byId[id].history.slice(0, len - 1),
+          {
+            right: undefined,
+            left: lastFlyout.left,
+            preview: lastFlyout.preview,
+          },
+        ];
+      }
     }
 
     state.needsSync = true;
@@ -134,6 +212,19 @@ export const panelsReducer = createReducer(initialPanelsState, (builder) => {
   builder.addCase(closePreviewPanelAction, (state, { payload: { id } }) => {
     if (id in state.byId) {
       state.byId[id].preview = undefined;
+
+      const len = state.byId[id].history.length;
+      if (len > 0) {
+        const lastFlyout = state.byId[id].history[len - 1];
+        state.byId[id].history = [
+          ...state.byId[id].history.slice(0, len - 1),
+          {
+            right: lastFlyout.right,
+            left: lastFlyout.left,
+            preview: undefined,
+          },
+        ];
+      }
     }
 
     state.needsSync = true;
@@ -149,10 +240,24 @@ export const panelsReducer = createReducer(initialPanelsState, (builder) => {
         right,
         left,
         preview: preview ? [preview] : undefined,
+        history: right || left || preview ? [{ right, left, preview }] : [],
       };
     }
 
     state.needsSync = false;
+  });
+
+  builder.addCase(goBackAction, (state, { payload: { id } }) => {
+    if (id in state.byId && state.byId[id].history.length > 1) {
+      state.byId[id].history?.pop();
+
+      const lastFlyout = state.byId[id].history[state.byId[id].history.length - 1];
+      state.byId[id].right = lastFlyout.right;
+      state.byId[id].left = lastFlyout.left;
+      state.byId[id].preview = lastFlyout.preview ? [lastFlyout.preview] : undefined;
+
+      state.needsSync = true;
+    }
   });
 });
 

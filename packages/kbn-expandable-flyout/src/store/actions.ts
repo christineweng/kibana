@@ -32,6 +32,7 @@ export enum ActionType {
   changeUserSectionWidths = 'change_user_section_widths',
 
   resetAllUserWidths = 'reset_all_user_widths',
+  goBack = 'goBack',
 }
 
 export const openPanelsAction = createAction<{
@@ -197,3 +198,10 @@ export const changeUserSectionWidthsAction = createAction<{
 }>(ActionType.changeUserSectionWidths);
 
 export const resetAllUserChangedWidthsAction = createAction(ActionType.resetAllUserWidths);
+
+export const goBackAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.goBack);

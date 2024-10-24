@@ -11,7 +11,10 @@ import React, { useCallback } from 'react';
 import type { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_PREVIEW_BANNER } from '../../document_details/preview/constants';
-import { DocumentDetailsPreviewPanelKey } from '../../document_details/shared/constants/panel_keys';
+import {
+  DocumentDetailsPreviewPanelKey,
+  // DocumentDetailsRightPanelKey,
+} from '../../document_details/shared/constants/panel_keys';
 
 interface AlertPreviewButtonProps {
   /**
@@ -41,6 +44,7 @@ export const AlertPreviewButton: FC<AlertPreviewButtonProps> = ({
   'data-test-subj': dataTestSubj,
   scopeId,
 }) => {
+  // const { openFlyout } = useExpandableFlyoutApi();
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const openAlertPreview = useCallback(
@@ -51,17 +55,35 @@ export const AlertPreviewButton: FC<AlertPreviewButtonProps> = ({
           id,
           indexName,
           scopeId,
-          isPreviewMode: true,
+          // isPreviewMode: true,
           banner: ALERT_PREVIEW_BANNER,
         },
       }),
     [openPreviewPanel, id, indexName, scopeId]
   );
 
+  // const openAlertFlyout = useCallback(
+  //   () =>
+  //     openFlyout({
+  //       right: {
+  //         id: DocumentDetailsRightPanelKey,
+  //         params: {
+  //           id,
+  //           indexName,
+  //           scopeId,
+  //           // isPreviewMode: true,
+  //           // banner: ALERT_PREVIEW_BANNER,
+  //         },
+  //       },
+  //     }),
+  //   [id, indexName, scopeId, openFlyout]
+  // );
+
   return (
     <EuiButtonIcon
       iconType="expand"
       data-test-subj={dataTestSubj}
+      // onClick={openAlertFlyout}
       onClick={openAlertPreview}
       aria-label={i18n.translate('xpack.securitySolution.flyout.right.alertPreview.ariaLabel', {
         defaultMessage: 'Preview alert with id {id}',

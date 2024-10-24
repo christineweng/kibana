@@ -45,18 +45,22 @@ export const EntitiesOverview: React.FC = () => {
 
   const link = useMemo(
     () =>
-      !isPreviewMode
-        ? {
-            callback: goToEntitiesTab,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.entities.entitiesTooltip"
-                defaultMessage="Show all entities"
-              />
-            ),
-          }
-        : undefined,
-    [goToEntitiesTab, isPreviewMode]
+      // !isPreviewMode
+      // ? {
+      ({
+        callback: goToEntitiesTab,
+        tooltip: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.insights.entities.entitiesTooltip"
+            defaultMessage="Show all entities"
+          />
+        ),
+      }),
+    [
+      // : undefined,
+      // goToEntitiesTab, isPreviewMode
+      goToEntitiesTab,
+    ]
   );
 
   return (

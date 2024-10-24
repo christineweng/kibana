@@ -11,8 +11,12 @@ export { ExpandableFlyout } from './src';
 
 export { useExpandableFlyoutApi } from './src/hooks/use_expandable_flyout_api';
 export { useExpandableFlyoutState } from './src/hooks/use_expandable_flyout_state';
+export { useExpandableFlyoutHistory } from './src/hooks/use_expandable_flyout_history';
 
-export { type FlyoutPanels as ExpandableFlyoutState } from './src/store/state';
+export {
+  type FlyoutPanels as ExpandableFlyoutState,
+  type FlyoutHistoryProps,
+} from './src/store/state';
 
 export { ExpandableFlyoutProvider } from './src/provider';
 export { withExpandableFlyoutProvider } from './src/with_provider';

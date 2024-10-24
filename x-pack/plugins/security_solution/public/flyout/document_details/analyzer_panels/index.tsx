@@ -42,7 +42,7 @@ export const AnalyzerPanel: React.FC<AnalyzerPanelProps> = ({ resolverComponentI
             id: documentId,
             indexName,
             scopeId,
-            isPreviewMode: true,
+            // isPreviewMode: true,
             banner: ALERT_PREVIEW_BANNER,
           },
         });

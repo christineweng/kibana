@@ -17,6 +17,7 @@ export const createExpandableFlyoutApiMock = () => ({
   openLeftPanel: jest.fn(),
   openPreviewPanel: jest.fn(),
   openRightPanel: jest.fn(),
+  goBack: jest.fn(),
 });
 
 export const createExpandableFlyoutMock = () => {

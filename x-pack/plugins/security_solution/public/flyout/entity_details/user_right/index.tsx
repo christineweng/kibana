@@ -119,7 +119,7 @@ export const UserPanel = ({
     setQuery,
   });
 
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
   const openPanelTab = useCallback(
     (tab?: EntityDetailsLeftPanelTab) => {
       telemetry.reportRiskInputsExpandedFlyoutOpened({
@@ -159,6 +159,31 @@ export const UserPanel = ({
       ),
     [isRiskScoreExist, openPanelTab]
   );
+
+  const openUserFlyout = useCallback(() => {
+    openFlyout({
+      right: {
+        id: UserPanelKey,
+        title: userName,
+        params: {
+          userName,
+          scopeId,
+        },
+      },
+      left: {
+        id: UserDetailsPanelKey,
+        params: {
+          isRiskScoreExist: !!userRiskData?.user?.risk,
+          scopeId,
+          user: {
+            name: userName,
+            email,
+          },
+          hasMisconfigurationFindings,
+        },
+      },
+    });
+  }, [userName, openFlyout, scopeId, userRiskData?.user?.risk, email, hasMisconfigurationFindings]);
 
   const hasUserDetailsData =
     !!userRiskData?.user.risk ||
@@ -208,7 +233,7 @@ export const UserPanel = ({
               contextID={contextID}
               scopeId={scopeId}
               isDraggable={!!isDraggable}
-              openDetailsPanel={!isPreviewMode ? openPanelTab : undefined}
+              openDetailsPanel={!isPreviewMode ? openPanelTab : openUserFlyout}
               isPreviewMode={isPreviewMode}
             />
             {isPreviewMode && (
