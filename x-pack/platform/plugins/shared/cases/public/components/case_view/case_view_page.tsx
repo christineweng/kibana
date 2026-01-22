@@ -18,6 +18,7 @@ import { CaseViewActivity } from './components/case_view_activity';
 import { CaseViewAlerts } from './components/case_view_alerts';
 import { CaseViewFiles } from './components/case_view_files';
 import { CaseViewObservables } from './components/case_view_observables';
+import { CaseViewSavedObjects } from './components/case_view_saved_objects';
 import { CaseViewMetrics } from './metrics';
 import type { CaseViewPageProps } from './types';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
@@ -40,6 +41,7 @@ const ATTACHMENT_TABS = [
   CASE_VIEW_PAGE_TABS.EVENTS,
   CASE_VIEW_PAGE_TABS.FILES,
   CASE_VIEW_PAGE_TABS.OBSERVABLES,
+  CASE_VIEW_PAGE_TABS.SAVEDOBJECTS,
 ];
 
 export const CaseViewPage = React.memo<CaseViewPageProps>(
@@ -178,6 +180,13 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                     caseData={caseWithFilteredAttachments}
                     searchTerm={searchTerm}
                     onUpdateField={onUpdateField}
+                  />
+                )}
+                {activeTabId === CASE_VIEW_PAGE_TABS.SAVEDOBJECTS && (
+                  <CaseViewSavedObjects
+                    caseData={caseWithFilteredAttachments}
+                    searchTerm={searchTerm}
+                    isLoading={isLoading}
                   />
                 )}
               </>

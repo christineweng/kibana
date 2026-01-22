@@ -14,11 +14,12 @@ import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { ALERTS_TAB, EVENTS_TAB, FILES_TAB, OBSERVABLES_TAB } from './translations';
 import { type CaseUI } from '../../../common';
+import type { ExternalReferenceAttachmentUI } from '../../../common/ui/types';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { AttachmentType } from '../../../common/types/domain';
+import { AttachmentType, ExternalReferenceStorageType } from '../../../common/types/domain';
 
 const FilesBadge = ({
   activeTab,
@@ -179,6 +180,28 @@ const EventsBadge = ({
 
 EventsBadge.displayName = 'EventsBadge';
 
+const SavedObjectsBadge = ({
+  activeTab,
+  count,
+  euiTheme,
+}: {
+  activeTab: string;
+  count: number;
+  euiTheme: EuiThemeComputed<{}>;
+}) => (
+  <EuiNotificationBadge
+    css={css`
+      margin-left: ${euiTheme.size.xs};
+    `}
+    data-test-subj="case-view-saved-objects-stats-badge"
+    color={activeTab === CASE_VIEW_PAGE_TABS.SAVEDOBJECTS ? 'accent' : 'subdued'}
+  >
+    {count}
+  </EuiNotificationBadge>
+);
+
+SavedObjectsBadge.displayName = 'SavedObjectsBadge';
+
 export interface CaseViewTab {
   badge?: ReactNode;
   id: CASE_VIEW_PAGE_TABS;
@@ -233,11 +256,45 @@ export const useCaseAttachmentTabs = ({
     );
   }, [searchTerm, features, caseData]);
 
+  const isExternalReferenceSOAttachment = (
+    attachment: CaseUI['comments'][number]
+  ): attachment is ExternalReferenceAttachmentUI => {
+    return (
+      attachment.type === AttachmentType.externalReference &&
+      'externalReferenceStorage' in attachment &&
+      attachment.externalReferenceStorage?.type === ExternalReferenceStorageType.savedObject &&
+      Boolean(attachment.externalReferenceStorage?.soType) &&
+      Boolean(attachment.externalReferenceId)
+    );
+  };
+
+  const savedObjectsCount = useMemo(() => {
+    const attachments = caseData.comments || [];
+    const savedObjectAttachments = attachments.filter(isExternalReferenceSOAttachment);
+
+    if (!searchTerm) {
+      return savedObjectAttachments.length;
+    }
+
+    // Apply search term filter if provided
+    return savedObjectAttachments.filter((attachment) => {
+      const storage = attachment.externalReferenceStorage;
+      const soType =
+        storage && 'soType' in storage && storage.type === ExternalReferenceStorageType.savedObject
+          ? storage.soType
+          : '';
+      const id = attachment.externalReferenceId || '';
+      const searchLower = searchTerm.toLowerCase();
+      return soType.toLowerCase().includes(searchLower) || id.toLowerCase().includes(searchLower);
+    }).length;
+  }, [caseData.comments, searchTerm]);
+
   const totalAttachments =
     stats.totalAlerts +
     stats.totalEvents +
     Number(fileStatsData?.total) +
-    (canShowObservableTabs && isObservablesFeatureEnabled ? observables.length : 0);
+    (canShowObservableTabs && isObservablesFeatureEnabled ? observables.length : 0) +
+    savedObjectsCount;
 
   const tabsConfig = useMemo(
     () => [
@@ -300,6 +357,13 @@ export const useCaseAttachmentTabs = ({
             },
           ]
         : []),
+      {
+        id: CASE_VIEW_PAGE_TABS.SAVEDOBJECTS,
+        name: 'saved objects',
+        badge: (
+          <SavedObjectsBadge count={savedObjectsCount} activeTab={activeTab} euiTheme={euiTheme} />
+        ),
+      },
     ],
     [
       activeTab,
@@ -315,6 +379,7 @@ export const useCaseAttachmentTabs = ({
       isLoadingObservables,
       isObservablesFeatureEnabled,
       observables.length,
+      savedObjectsCount,
     ]
   );
 

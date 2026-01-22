@@ -18,6 +18,8 @@ export const registerInternalAttachments = (
   persistableStateRegistry: PersistableStateAttachmentTypeRegistry
 ) => {
   externalRefRegistry.register({ id: FILE_ATTACHMENT_TYPE, schemaValidator });
+  externalRefRegistry.register({ id: '.dashboard' });
+  externalRefRegistry.register({ id: '.index-pattern' });
   persistableStateRegistry.register({ id: LENS_ATTACHMENT_TYPE });
 };
 
