@@ -111,7 +111,7 @@ describe('useAddToExistingCase', () => {
     const getAttachments = mockOpenSelectCaseModal.mock.calls[0][0].getAttachments;
     const attachments = getAttachments();
 
-    expect(attachments).toHaveLength(4);
+    expect(attachments).toHaveLength(3);
     expect(attachments[0]).toEqual({
       comment: 'Comment 1',
       type: 'user',
@@ -121,22 +121,15 @@ describe('useAddToExistingCase', () => {
       type: 'user',
     });
     expect(attachments[2]).toEqual({
-      alertId: 'replacement1', // <-- case attachment uses the replacement values
-      index: '',
-      rule: {
-        id: null,
-        name: null,
+      type: 'security.alert',
+      attachmentId: ['replacement1', 'replacement2'], // <-- case attachment uses the replacement values
+      metadata: {
+        index: '',
+        rule: {
+          id: null,
+          name: null,
+        },
       },
-      type: 'alert',
-    });
-    expect(attachments[3]).toEqual({
-      alertId: 'replacement2',
-      index: '',
-      rule: {
-        id: null,
-        name: null,
-      },
-      type: 'alert',
     });
   });
 });

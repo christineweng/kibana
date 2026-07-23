@@ -8,6 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 
 import { useAddToNewCase } from '.';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
 
 jest.mock('../../../../../common/lib/kibana', () => ({
@@ -83,5 +84,55 @@ describe('useAddToNewCase', () => {
     });
 
     expect(onClick).toHaveBeenCalled();
+  });
+
+  it('opens the create case flyout with a single grouped alert attachment', () => {
+    const canUserCreateAndReadCases = jest.fn().mockReturnValue(true);
+    const mockOpen = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        cases: {
+          hooks: {
+            useCasesAddToNewCaseFlyout: jest.fn().mockReturnValue({
+              open: mockOpen,
+            }),
+          },
+        },
+      },
+    });
+
+    const { result } = renderHook(
+      () =>
+        useAddToNewCase({
+          canUserCreateAndReadCases,
+          title: 'Persistent Execution of Malicious Application',
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    act(() => {
+      result.current.onAddToNewCase({
+        alertIds: ['alert1', 'alert2'],
+        markdownComments: ['Comment 1', 'Comment 2'],
+        replacements: { alert1: 'replacement1', alert2: 'replacement2' },
+      });
+    });
+
+    const { attachments } = mockOpen.mock.calls[0][0];
+
+    expect(attachments).toHaveLength(3);
+    expect(attachments[2]).toEqual({
+      type: 'security.alert',
+      attachmentId: ['replacement1', 'replacement2'],
+      metadata: {
+        index: '',
+        rule: {
+          id: null,
+          name: null,
+        },
+      },
+    });
   });
 });

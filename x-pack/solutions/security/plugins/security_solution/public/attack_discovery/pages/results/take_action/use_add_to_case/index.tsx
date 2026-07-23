@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import { AttachmentType, SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { getOriginalAlertIds, type Replacements } from '@kbn/elastic-assistant-common';
@@ -64,15 +64,22 @@ export const useAddToNewCase = ({
       }));
 
       const originalAlertIds = getOriginalAlertIds({ alertIds, replacements });
-      const alertAttachments = originalAlertIds.map<CaseAttachmentWithoutOwner>((alertId) => ({
-        alertId,
-        index: alertsIndexPattern ?? '',
-        rule: {
-          id: null,
-          name: null,
-        },
-        type: AttachmentType.alert,
-      }));
+      const alertAttachments: CaseAttachmentWithoutOwner[] =
+        originalAlertIds.length > 0
+          ? [
+              {
+                type: SECURITY_ALERT_ATTACHMENT_TYPE,
+                attachmentId: originalAlertIds,
+                metadata: {
+                  index: alertsIndexPattern ?? '',
+                  rule: {
+                    id: null,
+                    name: null,
+                  },
+                },
+              },
+            ]
+          : [];
 
       const attachments = [...userCommentAttachments, ...alertAttachments];
 
